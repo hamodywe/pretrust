@@ -7,6 +7,11 @@ It never executes anything it scans, never resolves or expands variables, and ne
 follows a command into the script it invokes. It makes no network calls. Running
 `pretrust` against a hostile repository is safe by design; that is the whole point.
 
+Two capabilities beyond reading, both explicit and narrow: `--diff` shells out to
+`git` plumbing (`ls-tree`, `show`) to read a base revision — read-only, and it never
+runs content from the repository; `--update-baseline` writes a JSON file to the path
+you name. Neither is engaged unless you pass the corresponding flag.
+
 Report text taken from a scanned repository (evidence lines, notes, file paths) is
 stripped of terminal control characters before display, so a crafted config cannot
 rewrite the report about itself.

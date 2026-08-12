@@ -1,6 +1,6 @@
 {
   "name": "pretrust",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Maps every code-execution path that fires when you open or clone a repo — before you run anything. Deterministic, offline, editor- and agent-agnostic.",
   "type": "module",
   "bin": {
@@ -36,6 +36,7 @@
     "supply-chain",
     "malware",
     "static-analysis",
+    "python",
     "vscode",
     "devcontainer",
     "git-hooks",

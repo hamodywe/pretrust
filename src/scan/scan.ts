@@ -4,7 +4,7 @@
  * two runs over the same tree produce byte-identical output, which is what makes
  * the tool usable as a CI gate.
  */
-import { SEVERITY_ORDER, type Finding, type ScanResult, type Surface } from '../model.js';
+import { SEVERITY_ORDER, findingKey, type Finding, type ScanResult, type Surface } from '../model.js';
 import { collectRepo, type RepoScan } from './fs.js';
 import { agentHooks } from '../surfaces/agentHooks.js';
 import { devcontainer } from '../surfaces/devcontainer.js';
@@ -13,6 +13,7 @@ import { gitConfig } from '../surfaces/gitConfig.js';
 import { gitHooks } from '../surfaces/gitHooks.js';
 import { mcp } from '../surfaces/mcp.js';
 import { npmLifecycle } from '../surfaces/npmLifecycle.js';
+import { pythonStartup } from '../surfaces/pythonStartup.js';
 import { vscodeSettings } from '../surfaces/vscodeSettings.js';
 import { vscodeTasks } from '../surfaces/vscodeTasks.js';
 
@@ -21,6 +22,7 @@ export const SURFACES: readonly Surface[] = [
   vscodeSettings,
   devcontainer,
   npmLifecycle,
+  pythonStartup,
   gitHooks,
   gitConfig,
   direnv,
@@ -56,4 +58,14 @@ export function scanFiles(root: string, repo: RepoScan): ScanResult {
 /** Scan a repository on disk. */
 export function scanRepo(root: string): ScanResult {
   return scanFiles(root, collectRepo(root));
+}
+
+/**
+ * The execution paths present in `head` but not in `base`, by stable key — i.e.
+ * the paths a change introduced. Order is preserved from `head`, which is already
+ * severity-sorted.
+ */
+export function diffFindings(base: readonly Finding[], head: readonly Finding[]): Finding[] {
+  const baseKeys = new Set(base.map(findingKey));
+  return head.filter((f) => !baseKeys.has(findingKey(f)));
 }

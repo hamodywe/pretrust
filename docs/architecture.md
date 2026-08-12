@@ -47,7 +47,14 @@ files it cares about, and returns findings. It performs no I/O of its own — wh
 is what makes the whole tool deterministic and each surface testable with a
 synthetic file map, no disk required.
 
-Nine surfaces ship today; see the table in the [README](../README.md#surfaces).
+Ten surfaces ship today; see the table in the [README](../README.md#surfaces).
+
+Because a surface is pure over `(files, read)`, the same scanners run over a
+different *source* of files just by swapping the `RepoScan`. `--diff` uses this: a
+git-backed `RepoScan` (`src/git/tree.ts`) reads a base ref through `git ls-tree` /
+`git show`, so `diffFindings` can report exactly the paths a change adds. Findings
+are matched by a line-independent `findingKey`, which also backs the `--baseline`
+allowlist (`src/baseline.ts`).
 
 ## The risk overlay (`src/signals/command.ts`)
 

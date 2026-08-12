@@ -82,7 +82,7 @@ export function renderTerminal(result: ScanResult, style: Style): string {
   const counts = countBy(findings);
   const total = findings.length;
   lines.push(
-    `  ${style.bold(String(total))} execution path${total === 1 ? '' : 's'} that run without you asking  ${style.dim('—')}  ${summaryLine(counts, style)}`,
+    `  ${style.bold(String(total))} execution path${total === 1 ? '' : 's'} that run${total === 1 ? 's' : ''} without you asking  ${style.dim('—')}  ${summaryLine(counts, style)}`,
   );
   lines.push('');
 

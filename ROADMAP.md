@@ -4,20 +4,23 @@ Direction, not promises. Ordered roughly by value-to-effort. The bar for anythin
 here is the same as everywhere in this project: a finding must be a provable fact
 about a file.
 
+## Shipped in 0.2.0
+
+- ~~`--diff` mode~~ — report only the execution paths a change adds versus a ref.
+- ~~`--baseline` / allowlist~~ — fail only on paths new relative to a recorded set.
+- ~~Python interpreter-start surface~~ — `sitecustomize.py`, `usercustomize.py`,
+  `conftest.py`.
+- ~~`pretrust explain`~~ — the tool teaches its own threat model.
+
 ## Near term
 
 - **More surfaces, each with a documented trigger citation.**
   - JetBrains `.idea/` external tools and run configurations that trigger on open.
   - `.vscode/extensions.json` recommendations paired with extensions that act on
     open (reported as context, not execution).
-  - Python `sitecustomize.py` / `usercustomize.py` and `.pth` files on the path —
-    interpreter-start execution.
+  - Python `.pth` files that carry an `import` line — but only once we can prove
+    the trigger (they execute from a site directory, not a plain checkout).
   - Makefile / Taskfile default targets invoked by editor "run on open" plugins.
-- **`--baseline` / allowlist.** Record the accepted execution paths for a repo you
-  maintain, so CI only fails on *new* ones — the same idea as a lint baseline.
-- **`--diff` mode.** Given two revisions, report only the execution paths a change
-  *adds*. This is the form most useful on a pull request: "this PR adds a
-  folder-open task."
 
 ## Medium term
 

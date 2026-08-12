@@ -69,10 +69,34 @@ pretrust ./suspicious-repo --min high
 # Use it as a gate in CI (exit 1 if anything is high)
 pretrust . --fail-on high
 
+# Report only the execution paths THIS branch adds versus main
+pretrust . --diff main --fail-on high
+
+# Accept the current paths as a baseline, then fail only on new ones
+pretrust . --update-baseline
+pretrust . --baseline .pretrust-baseline.json --fail-on high
+
+# Learn what each surface is, when it fires, and why
+pretrust explain
+pretrust explain devcontainer
+
 # Machine-readable output
 pretrust . --json
 pretrust . --sarif > pretrust.sarif
 ```
+
+### Made for pull requests
+
+Two features make pretrust practical on a real, messy codebase instead of only a
+fresh clone:
+
+- **`--diff <ref>`** reports only the execution paths a change *adds* relative to a
+  git ref. On a PR, `pretrust . --diff origin/main --fail-on high` fails only when
+  the branch introduces a new high-severity path — pre-existing inventory does not
+  block the build. The base is read through git plumbing; nothing is executed.
+- **`--baseline`** records the paths you have already reviewed and accepted (with
+  `--update-baseline`), then fails only on paths that are new relative to that
+  record — the lint-baseline pattern, applied to execution surfaces.
 
 ### Exit codes
 
@@ -81,6 +105,20 @@ pretrust . --sarif > pretrust.sarif
 | `0` | No findings at or above `--fail-on` (default: `high`) |
 | `1` | Findings at or above `--fail-on` |
 | `2` | Usage or runtime error |
+
+### Options
+
+| Option | Purpose |
+|--------|---------|
+| `--diff <ref>` | Report only paths added versus a git ref |
+| `--baseline <file>` | Suppress paths recorded in a baseline; fail on new ones |
+| `--update-baseline` | Write the current paths to the baseline and exit |
+| `--min <severity>` | Report only findings at or above this level (default `info`) |
+| `--fail-on <severity>` | Exit non-zero at or above this level (default `high`; `none` disables) |
+| `--json` / `--sarif` | Machine-readable output |
+| `--color` / `--no-color` | Force colour (default: auto) |
+
+Plus the `pretrust explain [surface]` subcommand.
 
 ## Surfaces
 
@@ -92,6 +130,7 @@ pretrust covers the execution paths that fire before you deliberately run projec
 | `vscode-settings` | `.vscode/settings.json` | agent session | agent |
 | `devcontainer` | `.devcontainer/**/devcontainer.json` | container build | host (`initializeCommand`) / container |
 | `npm-lifecycle` | `package.json` | install | host |
+| `python-startup` | `sitecustomize.py`, `usercustomize.py`, `conftest.py` | interpreter start | host |
 | `git-hooks` | `.husky/`, `.githooks/`, `.git/hooks/` | git operation | host |
 | `git-config` | `.git/config` | git operation | host |
 | `direnv` | `.envrc` | cd into directory | host |

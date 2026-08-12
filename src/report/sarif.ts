@@ -18,6 +18,7 @@ const RULE_NAME: Record<string, string> = {
   'vscode-settings': 'VS Code confirmation-weakening setting',
   devcontainer: 'Dev container lifecycle command',
   'npm-lifecycle': 'npm install lifecycle script',
+  'python-startup': 'Python interpreter-startup file',
   'git-hooks': 'Git hook',
   'git-config': 'Git config execution directive',
   direnv: 'direnv .envrc',

