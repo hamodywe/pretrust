@@ -1,0 +1,9 @@
+{
+  "name": "clean-fixture",
+  "version": "1.0.0",
+  "scripts": {
+    "postinstall": "node-gyp rebuild",
+    "prepare": "husky",
+    "build": "tsc -p ."
+  }
+}

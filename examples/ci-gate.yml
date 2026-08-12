@@ -1,0 +1,19 @@
+# Example: fail a pull request if it introduces a high-severity execution path.
+# Copy into .github/workflows/ in your own repository.
+name: pretrust
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  pretrust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Gate: exit non-zero (failing the job) on any high-severity finding.
+      - run: npx pretrust . --fail-on high

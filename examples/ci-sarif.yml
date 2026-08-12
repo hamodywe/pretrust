@@ -1,0 +1,27 @@
+# Example: upload pretrust findings to GitHub code scanning (Security tab).
+# Copy into .github/workflows/ in your own repository.
+name: pretrust-sarif
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  pretrust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Never fail the job here — the report lives in the Security tab.
+      - run: npx pretrust . --sarif --fail-on none > pretrust.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: pretrust.sarif
+          category: pretrust

@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22.18', '24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  # The suite runs .ts sources via type stripping, which needs a modern Node.
+  # This job proves the `engines: >=20.10` claim by building on modern Node and
+  # running the *built* CLI on 20.10 — testing the shipped artifact, not asserting.
+  supported-runtime:
+    name: supported-runtime (built CLI on Node 20.10)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.10'
+      - name: run built CLI on Node 20.10
+        run: |
+          node dist/cli.js --version
+          node dist/cli.js test/fixtures/clean --fail-on none
+          node dist/cli.js test/fixtures/hostile --json --fail-on none > /dev/null
+
+  dogfood:
+    name: dogfood (pretrust scans itself)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm run build
+      # Display the self-scan without failing — the repo carries intentionally
+      # hostile test fixtures, so we do not gate on our own findings.
+      - run: node dist/cli.js . --min medium --fail-on none

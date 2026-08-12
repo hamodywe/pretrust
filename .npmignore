@@ -1,0 +1,9 @@
+# Publish the built output and docs, not the sources or tests.
+src/
+test/
+tsconfig*.json
+.github/
+docs/
+examples/
+*.tsbuildinfo
+.gitignore
